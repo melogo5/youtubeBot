@@ -11,7 +11,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
-# login bot===================================================================================================
 def youtube_login(email, password):
     op = webdriver.ChromeOptions()
     op.add_argument('--disable-dev-shm-usage')
@@ -49,30 +48,26 @@ def youtube_login(email, password):
 
     return driver
 
-# ==============================================================================================================
 def seconds_to_hours(sec):
     h = ((sec // 3600)) % 24
     m = (sec // 60) % 60
     s = sec % 60
     return str(h) + ':' + str(m) + ':' + str(s)
-# comment bot===================================================================================================
+
 def comment_page(driver, urls, times, comment):
     if len(urls) == 0:
         print("Done!")
         return False
 
     url = urls.pop()
-    time_ = times.pop()
+    duration = times.pop()
 
     driver.get(url)
     print(url)
-    driver.implicitly_wait(1)
     time.sleep(4)
     driver.execute_script("window.scrollTo(0, 600);")
-    WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "ytd-comments ytd-comment-simplebox-renderer")))
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "ytd-comments ytd-comment-simplebox-renderer")))
     driver.find_element_by_css_selector("ytd-comments ytd-comment-simplebox-renderer div#placeholder-area").click()
-    driver.implicitly_wait(5)
     driver.find_element_by_xpath('//*[@id="contenteditable-root"]').send_keys(comment+f'\nНачало просмотра: {time.strftime("%H:%M", time.localtime())}')
     time.sleep(0.5)
     driver.find_element_by_xpath('//*[@id="contenteditable-root"]').send_keys(Keys.CONTROL, Keys.ENTER)
@@ -82,24 +77,12 @@ def comment_page(driver, urls, times, comment):
     )
     post.click()
 
-    # finding comment box and submiting our comment on it
-    # comment_box = EC.presence_of_element_located((By.CSS_SELECTOR, '#placeholder-area'))
-    # WebDriverWait(driver, 4).until(comment_box)
-    # comment_box1 = driver.find_element_by_css_selector('#placeholder-area')
-    # ActionChains(driver).move_to_element(comment_box1).click(comment_box1).perform()
-    # add_comment_onit = driver.find_element_by_css_selector('#contenteditable-root')
-    # add_comment_onit.send_keys(comment)
-    # driver.find_element_by_css_selector('#submit-button').click()
-    # print("done")
-
     time.sleep(np.random.randint(2, 5))
-    print(f'Waiting time: {seconds_to_hours(time_)}')
-    time.sleep(time_)
+    print(f'Waiting time: {seconds_to_hours(duration)}')
+    time.sleep(duration)
 
     driver.get(url)
     print("Video url:" + url)
-    driver.implicitly_wait(1)
-
     time.sleep(2)
     driver.execute_script("window.scrollTo(0, window.scrollY + 500)")
     time.sleep(5)
@@ -107,37 +90,21 @@ def comment_page(driver, urls, times, comment):
     time.sleep(3)
     return comment_page(driver, urls, times, random_comment())
 
-# ==============================================================================================================
 def update_comment(driver):
-    driver.implicitly_wait(1)
+    time.sleep(3)
     editMenu = driver.find_element_by_xpath("//ytd-comment-thread-renderer[@class='style-scope ytd-item-section-renderer'][1]//div[@id='action-menu']//button[@id='button']")
     editMenu.click()
-    driver.implicitly_wait(1)
     editButton = driver.find_element_by_css_selector("[role='menuitem'] a")
     editButton.click()
-    driver.implicitly_wait(1)
     commentField = driver.find_element_by_css_selector("[id='contenteditable-root']")
     commentField.send_keys(f'\nКонец просмотра: {time.strftime("%H:%M", time.localtime())}')
-    driver.implicitly_wait(1)
     submitButton = driver.find_element_by_css_selector("#submit-button a")
     submitButton.click()
 
-# comment section
 def random_comment():
     return videos.comments[np.random.randint(0, len(videos.comments))]
 
-# running bot------------------------------------------------------------------------------------
 if __name__ == '__main__':
     driver = youtube_login(config.email, config.password)
-    # urls = [
-    #     'https://www.youtube.com/watch?v=P-SVpUvFN8g',
-    #     'https://www.youtube.com/watch?v=P-SVpUvFN8g',
-    # ]
-    # times = [
-    #     30,
-    #     30,
-    # ]
-    # times = times[::-1]
-
-    # comment_page(driver, urls, times, random_comment())
+    driver.implicitly_wait(10)
     comment_page(driver, videos.urls[::-1], videos.times[::-1], random_comment())
