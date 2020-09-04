@@ -81,25 +81,21 @@ def comment_page(driver, urls, times, comment):
     print(f'Waiting time: {seconds_to_hours(duration)}')
     time.sleep(duration)
 
-    driver.get(url)
-    print("Video url:" + url)
-    time.sleep(2)
-    driver.execute_script("window.scrollTo(0, window.scrollY + 500)")
-    time.sleep(5)
     update_comment(driver)
-    time.sleep(3)
+    time.sleep(5)
     return comment_page(driver, urls, times, random_comment())
 
 def update_comment(driver):
-    time.sleep(3)
+    time.sleep(2)
     editMenu = driver.find_element_by_xpath("//ytd-comment-thread-renderer[@class='style-scope ytd-item-section-renderer'][1]//div[@id='action-menu']//button[@id='button']")
     editMenu.click()
+    time.sleep(1)
     editButton = driver.find_element_by_css_selector("[role='menuitem'] a")
     editButton.click()
-    commentField = driver.find_element_by_css_selector("[id='contenteditable-root']")
-    commentField.send_keys(f'\nКонец просмотра: {time.strftime("%H:%M", time.localtime())}')
-    submitButton = driver.find_element_by_css_selector("#submit-button a")
-    submitButton.click()
+    time.sleep(1)
+    driver.find_element_by_xpath('//ytd-comment-thread-renderer[1]//paper-input-container//yt-formatted-string/div').send_keys(f'\nКонец просмотра: {time.strftime("%H:%M", time.localtime())}')
+    time.sleep(1)
+    driver.find_element_by_xpath('//ytd-comment-thread-renderer[1]//paper-input-container//yt-formatted-string/div').send_keys(Keys.CONTROL, Keys.ENTER)
 
 def random_comment():
     return videos.comments[np.random.randint(0, len(videos.comments))]
